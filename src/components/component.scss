@@ -1,0 +1,23 @@
+:root {
+  --random-position: random(5px);
+}
+.song {
+  position: fixed;
+  top: 232px;
+  font-weight: 900;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: glide 5s infinite;
+  filter: invert(1);
+}
+
+@keyframes glide {
+  0% {
+    left: var(--random-position);
+  }
+  100% {
+    left: calc(var(--random-position) + 75vw);
+  }
+}

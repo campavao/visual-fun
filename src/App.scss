@@ -1,0 +1,92 @@
+.main-container {
+  background-color: #282c34;
+  min-height: 100vh;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.body-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: gray;
+  background-color: rgba(0, 0, 0, 0.5);
+  bottom: -17vh;
+  width: 100%;
+  padding-bottom: 3vh;
+
+  transition: all 0.25s ease-in-out 0.25s;
+
+  &:hover {
+    bottom: 0;
+    transition: all 0.25s ease-in-out 0.25s;
+  }
+}
+
+.random-image {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.button-container {
+  display: flex;
+  max-width: 500px;
+
+  button {
+    width: 235px;
+    height: 50px;
+    border: solid thick goldenrod;
+    background: palegoldenrod;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0 10px;
+  }
+  .reset {
+    width: 235px;
+    height: 50px;
+    border: solid thick palevioletred;
+    background: palevioletred;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+.quote-container {
+  max-width: 100vh;
+  text-align: center;
+}
+
+.song-query-container {
+  display: flex;
+  margin-top: 10px;
+  margin-left: -168px;
+  width: 315px;
+
+  input {
+    width: 25%;
+    min-height: 45px;
+
+    &:first-child {
+      width: 75%;
+      margin-right: 10px;
+    }
+  }
+}
+
+.mute {
+  height: 50px;
+  position: fixed;
+  right: 50px;
+  bottom: 15px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  font-family: cursive;
+  cursor: pointer;
+  text-transform: uppercase;
+}
