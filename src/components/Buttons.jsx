@@ -2,13 +2,14 @@
 
 import React, { Component } from "react";
 import "./component.scss";
+var classNames = require("classnames");
 
 // Buttons in order with their icon and menu name
-const buttonList = [
-	{ className: "fas fa-images fa-2x", menuName: "gif" },
-	{ className: "fab fa-youtube fa-2x", menuName: "video" },
-	{ className: "fas fa-music fa-2x", menuName: "song" },
-	{ className: "fas fa-quote-right fa-2x", menuName: "quote" },
+let buttonList = [
+	{ className: "fas fa-images fa-2x", menuName: "gif", active: false },
+	{ className: "fab fa-youtube fa-2x", menuName: "video", active: false },
+	{ className: "fas fa-music fa-2x", menuName: "song", active: false },
+	{ className: "fas fa-quote-right fa-2x", menuName: "quote", active: false },
 ];
 
 export default class Buttons extends Component {
@@ -18,31 +19,47 @@ export default class Buttons extends Component {
 			secondaryMenuOpen: false,
 			secondaryMenuTopic: "",
 			userSearchOpen: false,
-			userSearchTerm: "",
+			query: "",
 			randomFunction: null,
 		};
+	}
+
+	componentDidUpdate() {
+		const { open } = this.props;
+		const { secondaryMenuOpen } = this.state;
+		if (!open && secondaryMenuOpen) this.updateSecondaryMenu("", true);
 	}
 
 	updateSecondaryMenu = (topic, reset = false) => {
 		const { secondaryMenuOpen, secondaryMenuTopic } = this.state;
 		const menuOpen = secondaryMenuTopic === topic ? !secondaryMenuOpen : true;
 		if (!reset) {
-			this.setState({ secondaryMenuOpen: menuOpen, secondaryMenuTopic: topic });
+			this.setState({
+				secondaryMenuOpen: menuOpen,
+				secondaryMenuTopic: topic,
+			});
 		} else {
-			this.setState({ secondaryMenuOpen: false, secondaryMenuTopic: "" });
+			console.log("before", buttonList);
+			buttonList.forEach((button) => (button.active = false));
+			this.setState({
+				secondaryMenuOpen: false,
+				secondaryMenuTopic: "",
+			});
 		}
 	};
 
-	handleSecondaryMenu = (menuName) => {
+	handleSecondaryMenu = (random = false) => {
+		if (random) this.setState({ query: "" });
+		const { secondaryMenuTopic, query } = this.state;
 		const {
-			updateRandomGif,
+			updateGif,
 			updateRandomVideo,
 			updateRandomQuote,
 			updateRandomSong,
 		} = this.props;
-		switch (menuName) {
+		switch (secondaryMenuTopic) {
 			case "gif":
-				updateRandomGif();
+				updateGif(query);
 				break;
 			case "video":
 				updateRandomVideo();
@@ -58,21 +75,35 @@ export default class Buttons extends Component {
 		}
 	};
 
+	handleSearch = () => {
+		const { userSearchOpen, query } = this.state;
+		if (userSearchOpen && query !== "") this.handleSecondaryMenu(false);
+		else this.setState({ userSearchOpen: !userSearchOpen });
+	};
+
+	handleChange = (event) => {
+		this.setState({ query: event.target.value });
+	};
+
 	render() {
 		const {
 			secondaryMenuOpen,
 			userSearchOpen,
 			secondaryMenuTopic,
+			query,
 		} = this.state;
-		const { handleChange, reset } = this.props;
+		const { reset, open } = this.props;
 
 		return (
 			<div className='button-container'>
 				<div className='primary-container'>
 					{buttonList.map((buttonInfo) => {
+						buttonInfo.active = buttonInfo.menuName === secondaryMenuTopic;
 						return (
 							<button
-								className={buttonInfo.className}
+								className={classNames(buttonInfo.className, {
+									" active": buttonInfo.active,
+								})}
 								onClick={() => this.updateSecondaryMenu(buttonInfo.menuName)}
 								key={buttonInfo.menuName}
 							/>
@@ -83,25 +114,27 @@ export default class Buttons extends Component {
 						onClick={() => reset("", true)}
 					/>
 				</div>
-				{secondaryMenuOpen && (
+				{secondaryMenuOpen && open && (
 					<div className='secondary-container'>
 						<button
 							className='fas fa-question fa-2x'
-							onClick={() => this.handleSecondaryMenu()}
+							onClick={() => this.handleSecondaryMenu(true)}
 						/>
 						{userSearchOpen && (
 							<input
 								type='text'
-								onChange={(e) => handleChange(e)}
+								value={query}
+								onChange={this.handleChange}
 								placeholder={`type here to search for a ${secondaryMenuTopic}`}
 							/>
 						)}
 						<button
 							className={`fas ${
-								userSearchOpen ? "fa-search" : "fa-pencil-alt"
+								userSearchOpen ? "fa-arrow-right" : "fa-pencil-alt"
 							} fa-2x`}
-							onClick={() => this.setState({ userSearchOpen: !userSearchOpen })}
+							onClick={this.handleSearch}
 						/>
+						{userSearchOpen && <div className='third-container'></div>}
 					</div>
 				)}
 			</div>

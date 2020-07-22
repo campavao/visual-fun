@@ -26,9 +26,8 @@
 	z-index: -1;
 }
 
-.body-container {
+.bottom-slider {
 	z-index: 1;
-	filter: none !important;
 	align-items: center;
 	background: gray;
 	background-color: rgba(0, 0, 0, 0.5);
@@ -76,4 +75,5 @@
 	position: fixed;
 	height: 100vh !important;
 	width: 100vw !important;
+	z-index: 1;
 }

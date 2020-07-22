@@ -8,11 +8,12 @@ import {
 	getRandomSong,
 	getRandomNumber,
 	getRandomYoutubeVideo,
+	getRandomQuote,
 } from "./utils/actions";
+import { getGif } from "./utils/services";
 import Song from "./components/Song";
 import Buttons from "./components/Buttons";
 
-const movieQuote = require("popular-movie-quotes");
 const timeStamp = "?t=";
 
 class Mute extends Component {
@@ -42,6 +43,7 @@ class App extends Component {
 			youtubeLink: { video: null, audio: null },
 			videoService: "gif",
 			randomIsOn: true,
+			sliderOpen: true,
 		};
 	}
 
@@ -59,10 +61,17 @@ class App extends Component {
 		clearInterval(this.interval);
 	}
 
+	updateInterval() {
+		clearInterval(this.interval);
+		this.interval = setInterval(() => {
+			this.randomize();
+		}, 30000);
+	}
+
 	randomize = () => {
 		const { videoService } = this.state;
 		if (videoService === "gif") {
-			this.updateRandomGif();
+			this.updateGif();
 		} else {
 			this.updateRandomVideo();
 		}
@@ -82,9 +91,15 @@ class App extends Component {
 		});
 	};
 
-	updateRandomGif = () => {
+	updateGif = (query) => {
 		this.setState({ videoService: "gif" });
-		getRandomGif().then((res) => {
+		let gifSearch;
+		if (query !== "" && query) {
+			gifSearch = getGif(query);
+		} else {
+			gifSearch = getRandomGif();
+		}
+		gifSearch.then((res) => {
 			const randomGifUrl =
 				res.data[getRandomNumber(res.data.length)].images.original.url;
 
@@ -100,7 +115,7 @@ class App extends Component {
 	};
 
 	updateRandomQuote = () => {
-		const randomQuote = movieQuote.getRandomQuote();
+		const randomQuote = getRandomQuote();
 		this.setState({ randomQuote: randomQuote });
 	};
 
@@ -120,32 +135,35 @@ class App extends Component {
 			} else {
 				this.setState({ randomSong: song });
 			}
+			this.updateInterval();
 		});
-	};
-
-	handleChange = (event) => {
-		this.setState({ query: event.target.value });
 	};
 
 	toggleMute = () => {
 		this.setState({ mute: !this.state.mute });
 	};
 
+	handleSliderClose = (status) => {
+		this.setState({ sliderOpen: status });
+	};
+
 	render() {
 		const {
 			randomQuote,
 			randomGifStyle,
-			randomGifUrl,
 			randomSong,
 			mute,
 			youtubeLink,
 			videoService,
+			sliderOpen,
 		} = this.state;
 
 		return (
 			<div>
 				<div className='main-container'>
-					<span className='image-container' style={randomGifStyle} />
+					{videoService === "gif" && (
+						<span className='image-container' style={randomGifStyle} />
+					)}
 					{videoService === "video" && (
 						<ReactPlayer
 							url={youtubeLink}
@@ -154,17 +172,20 @@ class App extends Component {
 							muted
 						/>
 					)}
-					<div className='body-container'>
+					<div
+						className='bottom-slider'
+						onMouseEnter={() => this.handleSliderClose(true)}
+						onMouseLeave={() => this.handleSliderClose(false)}>
 						{randomQuote && <h3 className='quote-container'>{randomQuote}</h3>}
 						<Song song={randomSong} mute={mute} />
 						<Mute mute={mute} toggleMute={this.toggleMute} />
 						<Buttons
-							updateRandomGif={this.updateRandomGif}
+							updateGif={this.updateGif}
 							updateRandomVideo={this.updateRandomVideo}
 							updateRandomQuote={this.updateRandomQuote}
 							updateRandomSong={this.updateRandomSong}
-							handleChange={this.handleChange}
 							reset={this.randomize}
+							open={sliderOpen}
 						/>
 					</div>
 				</div>

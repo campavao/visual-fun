@@ -1,3 +1,5 @@
+/** @format */
+
 import wordList from "./words";
 import { getGif, getQuote, getYoutubeVideo, getSong } from "./services";
 
@@ -11,9 +13,9 @@ export const getRandomQuote = () => {
 };
 
 export const getRandomSong = () => {
-  const searchTerm = getRandomWord();
+	const searchTerm = getRandomWord();
 	return getSong(searchTerm);
-}
+};
 
 export const getRandomYoutubeVideo = () => {
 	return getYoutubeVideo(getRandomWord());

@@ -1,4 +1,7 @@
 /** @format */
+.active {
+	color: rgb(108, 194, 223) !important;
+}
 
 .song {
 	animation: glide 45s infinite;
@@ -27,14 +30,14 @@
 		color: white;
 		width: 15vw;
 		background: none;
-    border: none;
-    outline:none;
+		border: none;
+		outline: none;
 
-    &:last-child{
-      &:hover {
-        color: lighten($color: #ff9393, $amount: 0);
-      }
-    }
+		&:last-child {
+			&:hover {
+				color: lighten($color: #ff9393, $amount: 0);
+			}
+		}
 
 		&:active {
 			color: lightblue;
@@ -49,17 +52,17 @@
 .secondary-container {
 	display: flex;
 	justify-content: center;
-  margin-top: 30px;
-  
-  input {
-    width: 35vw;
-  }
+	margin-top: 30px;
+
+	input {
+		width: 35vw;
+	}
 
 	button {
-    &:last-child{
-      &:hover {
-        color: white;
-      }
-    }
+		&:last-child {
+			&:hover {
+				color: white;
+			}
+		}
 	}
 }
