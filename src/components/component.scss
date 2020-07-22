@@ -1,23 +1,65 @@
-:root {
-  --random-position: random(5px);
-}
+/** @format */
+
 .song {
-  position: fixed;
-  top: 232px;
-  font-weight: 900;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: glide 5s infinite;
-  filter: invert(1);
+	animation: glide 45s infinite;
+	font-weight: 900;
+	position: fixed;
+	text-transform: uppercase;
+	top: 50px;
 }
 
 @keyframes glide {
-  0% {
-    left: var(--random-position);
+	0% {
+		left: -100vw;
+	}
+	100% {
+		left: 200vw;
+	}
+}
+
+.button-container,
+.primary-container,
+.secondary-container {
+	display: block;
+	max-width: 90vw;
+
+	button {
+		color: white;
+		width: 15vw;
+		background: none;
+    border: none;
+    outline:none;
+
+    &:last-child{
+      &:hover {
+        color: lighten($color: #ff9393, $amount: 0);
+      }
+    }
+
+		&:active {
+			color: lightblue;
+		}
+
+		&:hover {
+			color: lighten($color: #d9ff93, $amount: 0);
+		}
+	}
+}
+
+.secondary-container {
+	display: flex;
+	justify-content: center;
+  margin-top: 30px;
+  
+  input {
+    width: 35vw;
   }
-  100% {
-    left: calc(var(--random-position) + 75vw);
-  }
+
+	button {
+    &:last-child{
+      &:hover {
+        color: white;
+      }
+    }
+	}
 }

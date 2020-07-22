@@ -1,122 +1,177 @@
+/** @format */
+
 import React, { Component } from "react";
+import ReactPlayer from "react-player";
 import "./App.scss";
-import { getRandomGif, getRandomSong, getRandomNumber } from "./utils/actions";
+import {
+	getRandomGif,
+	getRandomSong,
+	getRandomNumber,
+	getRandomYoutubeVideo,
+} from "./utils/actions";
 import Song from "./components/Song";
+import Buttons from "./components/Buttons";
+
 const movieQuote = require("popular-movie-quotes");
+const timeStamp = "?t=";
+
+class Mute extends Component {
+	render() {
+		const { mute, toggleMute } = this.props;
+		return (
+			<button className='mute' onClick={() => toggleMute()}>
+				{mute ? (
+					<i className='fas fa-play-circle fa-3x'></i>
+				) : (
+					<i className='fas fa-pause-circle fa-3x'></i>
+				)}
+			</button>
+		);
+	}
+}
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      randomGif: null,
-      randomQuote: null,
-      randomSong: null,
-      query: "",
-      mute: false
-    };
-  }
+	constructor(props) {
+		super(props);
+		this.state = {
+			randomGif: null,
+			randomQuote: null,
+			randomSong: null,
+			query: "",
+			mute: false,
+			youtubeLink: { video: null, audio: null },
+			videoService: "gif",
+			randomIsOn: true,
+		};
+	}
 
-  componentDidMount() {
-    this.initialize();
-  }
+	componentDidMount() {
+		const { randomIsOn } = this.state;
+		if (randomIsOn) {
+			this.randomize();
+			this.interval = setInterval(() => {
+				this.randomize();
+			}, 30000);
+		}
+	}
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
+	componentWillUnmount() {
+		clearInterval(this.interval);
+	}
 
-  initialize = () => {
-    this.updateRandomGif();
-    this.updateRandomQuote();
-    this.updateRandomSong();
-    clearInterval(this.interval);
-    this.interval = setInterval(() => {
-      console.log(new Date());
-      this.initialize();
-    }, 30000);
-  };
+	randomize = () => {
+		const { videoService } = this.state;
+		if (videoService === "gif") {
+			this.updateRandomGif();
+		} else {
+			this.updateRandomVideo();
+		}
+		this.updateRandomQuote();
+		this.updateRandomSong();
+	};
 
-  updateRandomGif = () => {
-    getRandomGif().then(res => {
-      console.log(res.data);
+	updateRandomVideo = () => {
+		this.setState({ videoService: "video" });
+		getRandomYoutubeVideo().then((res) => {
+			const formattedUrl =
+				"https://www.youtube.com/watch?v=" +
+				res.items[0].id.videoId +
+				timeStamp +
+				getRandomNumber(100);
+			this.setState({ youtubeLink: formattedUrl });
+		});
+	};
 
-      let randomGifStyle = {
-        backgroundImage:
-          "url(" +
-          res.data[getRandomNumber(res.data.length)].images.original.url +
-          ")",
-        backgroundRepeat: "repeat",
-        backgroundSize: "contain",
-        backgroundPosition: "top"
-      };
-      this.setState({ randomGifStyle: randomGifStyle });
-    });
-  };
+	updateRandomGif = () => {
+		this.setState({ videoService: "gif" });
+		getRandomGif().then((res) => {
+			const randomGifUrl =
+				res.data[getRandomNumber(res.data.length)].images.original.url;
 
-  updateRandomQuote = () => {
-    const randomQuote = movieQuote.getRandomQuote();
-    this.setState({ randomQuote: randomQuote });
-  };
+			const randomGifStyle = {
+				backgroundImage: "url(" + randomGifUrl + ")",
+				backgroundPosition: "center",
+			};
+			this.setState({
+				randomGifStyle: randomGifStyle,
+				randomGifUrl: randomGifUrl,
+			});
+		});
+	};
 
-  updateRandomSong = e => {
-    if (e) {
-      e.preventDefault();
-    }
-    const { query, mute } = this.state;
-    if (mute) return;
-    let song = null;
-    getRandomSong(query).then(res => {
-      if (res && res.tracks && res.tracks.items) {
-        song = res.tracks.items[0];
-      }
-      console.log(res);
-      if (!song.preview_url) {
-        return this.updateRandomSong(e);
-      } else {
-        this.setState({ randomSong: song });
-      }
-    });
-  };
+	updateRandomQuote = () => {
+		const randomQuote = movieQuote.getRandomQuote();
+		this.setState({ randomQuote: randomQuote });
+	};
 
-  handleChange = event => {
-    this.setState({ query: event.target.value });
-  };
+	updateRandomSong = (e) => {
+		if (e) {
+			e.preventDefault();
+		}
+		const { query, mute } = this.state;
+		if (mute) return;
+		let song = null;
+		getRandomSong(query).then((res) => {
+			if (res && res.tracks && res.tracks.items) {
+				song = res.tracks.items[0];
+			}
+			if (!song.preview_url) {
+				return this.updateRandomSong(e);
+			} else {
+				this.setState({ randomSong: song });
+			}
+		});
+	};
 
-  toggleMute = () => {
-    this.setState({ mute: !this.state.mute });
-  };
+	handleChange = (event) => {
+		this.setState({ query: event.target.value });
+	};
 
-  render() {
-    const { randomQuote, randomGifStyle, randomSong, mute } = this.state;
-    return (
-      <div className="main-container" style={randomGifStyle}>
-        <div className="body-container">
-          {randomQuote && <h3 className="quote-container">{randomQuote}</h3>}
-          <Song song={randomSong} mute={mute} />
-          <button className="mute" onClick={() => this.toggleMute()}>
-            {mute ? "unmute" : "mute"}
-          </button>
-          <div className="button-container">
-            <button onClick={() => this.updateRandomGif()}>new gif</button>
-            <button onClick={() => this.updateRandomQuote()}>new quote</button>
-            <button className="reset" onClick={() => this.initialize()}>
-              reset
-            </button>
-          </div>
-          <form
-            className="song-query-container"
-            onSubmit={e => this.updateRandomSong(e)}
-          >
-            <input
-              type="text"
-              value={this.state.query}
-              onChange={e => this.handleChange(e)}
-            />
-            <input type="submit" value="FIND" />
-          </form>
-        </div>
-      </div>
-    );
-  }
+	toggleMute = () => {
+		this.setState({ mute: !this.state.mute });
+	};
+
+	render() {
+		const {
+			randomQuote,
+			randomGifStyle,
+			randomGifUrl,
+			randomSong,
+			mute,
+			youtubeLink,
+			videoService,
+		} = this.state;
+
+		return (
+			<div>
+				<div className='main-container'>
+					<span className='image-container' style={randomGifStyle} />
+					{videoService === "video" && (
+						<ReactPlayer
+							url={youtubeLink}
+							playing
+							className='react-player'
+							muted
+						/>
+					)}
+					<div className='body-container'>
+						{randomQuote && <h3 className='quote-container'>{randomQuote}</h3>}
+						<Song song={randomSong} mute={mute} />
+						<Mute mute={mute} toggleMute={this.toggleMute} />
+						<Buttons
+							updateRandomGif={this.updateRandomGif}
+							updateRandomVideo={this.updateRandomVideo}
+							updateRandomQuote={this.updateRandomQuote}
+							updateRandomSong={this.updateRandomSong}
+							handleChange={this.handleChange}
+							reset={this.randomize}
+						/>
+					</div>
+				</div>
+				<div className='background' style={randomGifStyle} />
+			</div>
+		);
+	}
 }
 
 export default App;
